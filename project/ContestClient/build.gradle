@@ -4,6 +4,10 @@ application {
     mainClass = 'contest_2ima20.Main' 
 }
 
+java {
+    withSourcesJar()
+}
+
 sourceSets {
     main {
         java {

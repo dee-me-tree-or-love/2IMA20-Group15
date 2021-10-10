@@ -48,7 +48,9 @@ So when getting started, make sure `gradle` is installed on your machine.
 ### Useful commands
 
 - `gradle build` - compiles all the source code for the project
-- `gradle run` - starts the ContestClient (actually all the _\[application\]_'s included in the project) 
+- `gradle run` - starts the ContestClient (actually all the _\[application\]_'s included in the project)
+- `gradle clean` - removes all the directories produced by a build step
+- `gradle tasks` - shows a list of available tasks
 
 
 ## Delivering
