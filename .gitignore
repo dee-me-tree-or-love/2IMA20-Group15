@@ -1,0 +1,12 @@
+# Java
+.gradle
+.settings
+.project
+**/out/*
+**/build/*
+
+# IDEs
+.vscode
+
+# application misc
+guisettings.txt

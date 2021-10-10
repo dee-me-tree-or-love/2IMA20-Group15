@@ -1,0 +1,3 @@
+// Main build file
+
+apply plugin: 'java'

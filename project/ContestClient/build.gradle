@@ -1,0 +1,15 @@
+apply plugin: 'java'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/'
+        }
+        // output.resourcesDir = file('../out/contest-client/bin/')
+        // java.destinationDirectory.set(file('../out/contest-client/bin/'))
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: '../shared/lib',  include: ['*.jar'])
+}

@@ -30,9 +30,25 @@ Once the feature is complete, it can easily be merged into master by opening a n
 
 ### Folder structure
 
-- `framework` - is a provided framework code from the IMA20 course
-- `precompiled` - is the provided library bins from the IMA20 course
+- `project` - is a provided framework code from the IMA20 course with shared libraries
+- `precompiled` - is the collection of provided jars from the IMA20 course
 - `problems` is an example set of inputs for the problem
+
+### Getting started
+
+Make sure gradle is installed to manage the project compilation easier:
+
+```bash
+$ <your package manager> install gradle
+...
+done
+```
+
+> See [Gradle Installation Guide](https://docs.gradle.org/current/userguide/installation.html#installing_with_a_package_manager) for more information on how to set it up.
+
+#### Compiling
+
+
 
 ## Delivering
 
