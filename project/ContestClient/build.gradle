@@ -1,0 +1,26 @@
+apply plugin: 'application'
+
+application {
+    mainClass = 'contest_2ima20.Main' 
+}
+
+java {
+    withSourcesJar()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/'
+        }
+        resources {
+            srcDir 'src/resources'
+        }
+        output.resourcesDir = file('build/classes/java/main/resources/')
+    }
+}
+
+dependencies {
+    implementation project(':contest-core')
+    implementation fileTree(dir: '../shared/lib',  include: ['*.jar'])
+}
