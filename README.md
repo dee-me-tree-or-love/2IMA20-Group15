@@ -23,9 +23,21 @@ This repository contains 2 default branches:
 
 To keep the progres clean and reviawable, we can work on each new feature in a separe branch. (So as to avoid the `main` branch madness).
 
+#### Naming
+
 - `<name>-<quick feature description>`, for example `tony-faster-input-processing`.
 
-Once the feature is complete, it can easily be merged into master by opening a new Pull Request.
+#### Merging features
+
+1. Once the feature is complete,
+    it can be added to `main` branch
+    by opening a new Pull Request.
+
+2. Before merging, let's ask at least
+    1 other team member to review.
+
+3. Once the feature was approved,
+    feel free to merge the change! :tada:
 
 ### Folder structure
 
