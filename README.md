@@ -20,7 +20,7 @@ This repository contains 2 default branches:
 - `main` - used for integration of all the ongoing work
 - `release` - reserved for the clean "release" versions of our code
 
-### Development branches
+#### Development branches
 
 To keep the progres clean and reviawable, we can work on each new feature in a separe branch. (So as to avoid the `main` branch madness).
 
