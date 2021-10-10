@@ -5,8 +5,6 @@ sourceSets {
         java {
             srcDir 'src/'
         }
-        // output.resourcesDir = file('../out/contest-core/bin/')
-        // java.destinationDirectory.set(file('../out/contest-core/bin/'))
     }
 }
 
