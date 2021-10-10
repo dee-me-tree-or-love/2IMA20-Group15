@@ -53,7 +53,8 @@ So when getting started, make sure `gradle` is installed on your machine.
 
 ## Delivering
 
-<!-- TODO: describe deliverable requirements --> ...
+<!-- TODO: describe deliverable requirements -->
+To be elaborated...
 
 - Report
 - Contest code implementation
