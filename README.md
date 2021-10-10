@@ -24,33 +24,33 @@ This repository contains 2 default branches:
 
 To keep the progres clean and reviawable, we can work on each new feature in a separe branch. (So as to avoid the `main` branch madness).
 
-- `<name>-ft-<quick feature description>`, for example `tony-ft-improved-input-processing`. 
+- `<name>-<quick feature description>`, for example `tony-faster-input-processing`. 
 
 Once the feature is complete, it can easily be merged into master by opening a new Pull Request.
 
 ### Folder structure
 
-- `project` - is a provided framework code from the IMA20 course with shared libraries
-- `precompiled` - is the collection of provided jars from the IMA20 course
-- `problems` is an example set of inputs for the problem
+- `project` - is a base of the project solution.
+    - `project/ContestClient` - \[application\] source of the contest GUI (partially provided from the lectures).
+    - `project/ContestCore` - \[library\] source of the main entities used within the framework
+    - `project/shared` - \[precompiled\] dependencies provided for the project such as GeometryCore etc.
+- `problems` is an example set of inputs for the problem.
 
 ### Getting started
 
-Make sure gradle is installed to manage the project compilation easier:
-
-```bash
-$ <your package manager> install gradle
-...
-done
-```
+To make the management (compilation, running, distribution, etc) of the project easier, `gradle` build system is used.  
+So when getting started, make sure `gradle` is installed on your machine.
 
 > See [Gradle Installation Guide](https://docs.gradle.org/current/userguide/installation.html#installing_with_a_package_manager) for more information on how to set it up.
 
-#### Compiling
+#### Useful commands
 
-
+- `gradle build` - compiles all the source code for the project
+- `gradle run` - starts the ContestClient (actually all the _\[application\]_'s included in the project) 
 
 ## Delivering
+
+<!-- TODO: describe deliverable requirements --> ...
 
 - Report
 - Contest code implementation
