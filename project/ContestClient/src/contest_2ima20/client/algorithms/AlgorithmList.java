@@ -15,7 +15,8 @@ public class AlgorithmList {
 
     public static TrajectorySummarizationAlgorithm[] getAlgorithms() {
         return new TrajectorySummarizationAlgorithm[]{
-            new ArbitraryAlgorithm()
+            new ArbitraryAlgorithm(),
+            new Group15Take1Algorithm(),
         };
     }
 }

@@ -17,12 +17,12 @@ import nl.tue.geometrycore.geometry.linear.PolyLine;
 import java.util.*;
 import java.lang.*;
 
-
 /**
  *
  * @author Group15
  */
 public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
+    private static java.util.logging.Logger logger =  java.util.logging.Logger.getLogger("take1algo");
 
     private double[][] computeFrechetDistanceMatrix(List<? extends PolyLine> inputPolylines) {
         double[][] distances = new double[inputPolylines.size()][inputPolylines.size()];
@@ -35,7 +35,7 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         return distances;
     }
 
-    private List<? extends PolyLine> simplifyInput(List<? extends PolyLine> ps) {
+    private List<InputPolyLine> simplifyInput(List<InputPolyLine> ps) {
         // FIXME: implement with real approach
         return ps;
     }
@@ -69,8 +69,9 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
     }
 
     private int getSmallestDistanceTrajectory(double[][] distances, List<Integer> excludedLineIds){
+        logger.info(excludedLineIds.toString());
         double minSum = 10000000;
-        int selectedPolyline = -1;
+        int selectedPolyline = 0;
         for (int i = 0; i < distances.length; i++){
             double sum = 0;
             for (int j = 0; j < distances.length; j++) {
@@ -89,6 +90,7 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         List<Integer> excludedLineIds,
         List<List<Integer>> groups
     ) {
+        logger.info("Running performGrouping");
         if (excludedLineIds.size() == distances.length) {
             return groups;
         }
@@ -140,9 +142,9 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         ); 
     }
 
-    private List<List<PolyLine>> computePolylineGroups(
+    private List<List<InputPolyLine>> computePolylineGroups(
         double[][] distances,
-        List<? extends PolyLine> inputPolylines,
+        List<InputPolyLine> inputPolylines,
         int k
     ){
         double maxDistance = getMaxFrechetDistance(distances);
@@ -155,9 +157,9 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
             minDistance, 
             k
         );
-        List<List<PolyLine>> lineGroups = new ArrayList();
+        List<List<InputPolyLine>> lineGroups = new ArrayList();
         for (List<Integer> group: idGroups) {
-            List<PolyLine> linesOfGroup = new ArrayList();
+            List<InputPolyLine> linesOfGroup = new ArrayList();
             for (Integer id: group) {
                 linesOfGroup.add(inputPolylines.get(id));
             }
@@ -195,7 +197,7 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         double[][] distances = computeFrechetDistanceMatrix(simplifiedTrajectories);
 
         // Step 3: find the clustering of the polylines
-        List<List<PolyLine>> groupedPolylines = computePolylineGroups(
+        List<List<InputPolyLine>> groupedPolylines = computePolylineGroups(
             distances, 
             input.polylines, 
             input.k
@@ -204,6 +206,23 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         // TODO: Step 4: compute the mean/median over groups
 
         // TODO: Step 5: simplify the output?? (Or not?? it might be handy to compute the mean)
+
+        for (int i = 0; i < input.k; i++) {
+            OutputPolyLine outputPolyline = new OutputPolyLine();
+            output.polylines.add(outputPolyline);
+            List<InputPolyLine> outputGroup = groupedPolylines.get(i);
+            
+            // pretend we get a median computed somehow
+            PolyLine medianPolyline = outputGroup.get(0);
+            for (int j = 0; j < medianPolyline.vertexCount() && j < input.c; j++) {
+                outputPolyline.addVertex(medianPolyline.vertex(j).clone()); 
+            }
+
+            // map all input polylines to the outputted median
+            for (InputPolyLine p: outputGroup) {
+                output.input_to_output[p.index] = outputPolyline;
+            }
+        }
 
         return output;
     }
