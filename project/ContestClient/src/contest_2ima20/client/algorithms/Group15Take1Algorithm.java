@@ -140,7 +140,7 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         ); 
     }
 
-    private List<List<PolyLine>> getPolylineGroups(
+    private List<List<PolyLine>> computePolylineGroups(
         double[][] distances,
         List<? extends PolyLine> inputPolylines,
         int k
@@ -195,7 +195,7 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         double[][] distances = computeFrechetDistanceMatrix(simplifiedTrajectories);
 
         // Step 3: find the clustering of the polylines
-        List<List<PolyLine>> groupedPolylines = getPolylineGroups(
+        List<List<PolyLine>> groupedPolylines = computePolylineGroups(
             distances, 
             input.polylines, 
             input.k
