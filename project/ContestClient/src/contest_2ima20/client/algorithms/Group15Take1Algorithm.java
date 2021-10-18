@@ -17,27 +17,6 @@ import nl.tue.geometrycore.geometry.linear.PolyLine;
 import java.util.*;
 import java.lang.*;
 
-class Tuple {
-    int item;
-    double metric;
-
-    Tuple(int item, double metric) {
-        this.item = item;
-        this.metric = metric;
-    }
-}
-
-class TupleComparator implements Comparator<Tuple> {
-    public int compare(Tuple t1, Tuple t2) {
-        if (t1.metric > t2.metric) {
-            return 1;
-        }
-        if (t1.metric < t2.metric) {
-            return -1;
-        }
-        return 0;
-    }
-}
 
 /**
  *
