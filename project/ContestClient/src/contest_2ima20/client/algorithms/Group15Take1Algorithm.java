@@ -95,44 +95,102 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         ) / 2;
     }
     
-    private int getSmallestDistanceTrajectory(double[][] distances){
+    private int getSmallestDistanceTrajectory(double[][] distances, List<Integer> excludedLineIds){
         double minSum = 10000000;
-        int selectedPolyline = 0;
+        int selectedPolyline = -1;
         for (int i = 0; i < distances.length; i++){
             double sum = 0;
             for (int j = 0; j < distances.length; j++) {
                 sum += distances[i][j];
             }
-            if (sum < minSum) {
+            if (sum < minSum && !excludedLineIds.contains(i)) {
                 selectedPolyline = i;
             }
         }
         return selectedPolyline;
     }
 
-    private double[][] excludeLines(double[][] distances, double[] excludedLines){
-        double[][] newDistances = new double[excludedLines.length][distances.size];
-        // TODO: filter the disrtances
-    }
-
-
-    private List<List<? extends PolyLine>> getPolylineGroups(
+    private List<List<Integer>> performGrouping(
         double[][] distances,
-        int k,
-    ){
-        int[][] groups = new int[k][];
-        double averageDistance = getAverageFrechetDistance(distances);
-        int q = getSmallestDistanceTrajectory(distances);
-        int[] group = new int[];
-        for (int i = 0; i < distances.length){
-            // FIXME: recall all the right java syntax here
+        double averageDistance,
+        List<Integer> excludedLineIds,
+        List<List<Integer>> groups
+    ) {
+        if (excludedLineIds.size() == distances.length) {
+            return groups;
+        }
+        int q = getSmallestDistanceTrajectory(distances, excludedLineIds);
+        List<Integer> group = new ArrayList<Integer>();
+        for (int i = 0; i < distances.length; i++){
             if (distances[q][i] <= averageDistance) {
                 group.add(i);
             }
         }
-        groups[0] = group
+        groups.add(group);
+        excludedLineIds.addAll(group);
+        return performGrouping(distances, averageDistance, excludedLineIds, groups);
+    }
 
+    private List<List<Integer>> findOptimalGrouping(
+        double[][] distances,
+        double averageDistance,
+        double maxDistance,
+        double minDistance,
+        int targetGroupNumber
+    ){
+        List<List<Integer>> groups = new ArrayList();
+        List<Integer> excludedLineIds = new ArrayList();
 
+        groups = performGrouping(
+            distances, averageDistance, excludedLineIds, groups
+        );
+        if (groups.size() == targetGroupNumber) {
+            return groups;
+        }
+        
+        double newAverageDistance, newMaxDistance, newMinDistance = 0;
+        if (groups.size() > targetGroupNumber) {
+            newMinDistance = averageDistance;
+            newAverageDistance = (averageDistance + maxDistance) / 2;
+            newMaxDistance = maxDistance;
+        } else {
+            newMinDistance = minDistance;
+            newAverageDistance = (averageDistance + minDistance) / 2;
+            newMaxDistance = averageDistance;
+        }
+        return findOptimalGrouping(
+            distances, 
+            newAverageDistance, 
+            newMaxDistance, 
+            newMinDistance, 
+            targetGroupNumber
+        ); 
+    }
+
+    private List<List<PolyLine>> getPolylineGroups(
+        double[][] distances,
+        List<? extends PolyLine> inputPolylines,
+        int k
+    ){
+        double maxDistance = getMaxFrechetDistance(distances);
+        double minDistance = getMinFrechetDistance(distances);
+        double averageDistance = (maxDistance + minDistance) / 2;
+        List<List<Integer>> idGroups = findOptimalGrouping(
+            distances, 
+            averageDistance, 
+            maxDistance, 
+            minDistance, 
+            k
+        );
+        List<List<PolyLine>> lineGroups = new ArrayList();
+        for (List<Integer> group: idGroups) {
+            List<PolyLine> linesOfGroup = new ArrayList();
+            for (Integer id: group) {
+                linesOfGroup.add(inputPolylines.get(id));
+            }
+            lineGroups.add(linesOfGroup);
+        }
+        return lineGroups;
     }
 
 // === Binary search for grouping ===
