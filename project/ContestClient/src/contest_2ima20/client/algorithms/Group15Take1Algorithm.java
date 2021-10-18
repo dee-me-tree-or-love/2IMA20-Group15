@@ -215,56 +215,23 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         // creating an output
         Output output = new Output(input);
 
-        // Step 1: get simplification / clusters of related trajectories
+        // Step 1: get simplification / clusters of related trajectories???
         List<? extends PolyLine> simplifiedTrajectories = simplifyInput(input.polylines);
 
         // Step 2: get the distance matrix and the minHeap of total sums
         double[][] distances = computeFrechetDistanceMatrix(simplifiedTrajectories);
 
-        // Step 3: 
-        // 1. take the minimal (i, total) from minHeap
-        // 2. take a j furthest away from i
+        // Step 3: find the clustering of the polylines
+        List<List<PolyLine>> groupedPolylines = getPolylineGroups(
+            distances, 
+            input.polylines, 
+            input.k
+        );
 
-        return output;
-    }
+        // TODO: Step 4: compute the mean/median over groups
 
-    public Output doNotDoAlgorithm(Input input) {
+        // TODO: Step 5: simplify the output?? (Or not?? it might be handy to compute the mean)
 
-        // creating an output
-        Output output = new Output(input);
-
-        // define k output trajectories
-        for (int i = 0; i < input.k; i++) {
-
-            OutputPolyLine P = new OutputPolyLine();
-            output.polylines.add(P); // dont forget to add it!
-
-            // copy an arbitrary input trajectory
-            // make sure they're not too long
-            InputPolyLine Q = input.polylines.get(i);
-            for (int j = 0; j < Q.vertexCount() && j < input.c; j++) {
-                P.addVertex(Q.vertex(j).clone());
-                // the clone bit is important, vectors are objects!
-                // otherwise, nudging the output also changes the input
-            }
-
-            // this is bound to be a good one!
-            output.input_to_output[Q.index] = P;
-
-            // nudge their points a bit (fingers crossed)
-            for (Vector v : P.vertices()) {
-                v.translate(i, 0);
-            }
-        }
-
-        // make sure to map the rest as well
-        for (int i = 0; i < input.polylines.size(); i++) {
-            if (output.input_to_output[i] == null) {
-                output.input_to_output[i] = output.polylines.get(i % input.k);
-            }
-        }
-
-        // and make sure to return the result
         return output;
     }
 
