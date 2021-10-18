@@ -68,12 +68,6 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         return max;
     }
 
-    private double getAverageFrechetDistance(double[][] distances){
-        return (
-            getMaxFrechetDistance(distances) + getMinFrechetDistance(distances)
-        ) / 2;
-    }
-    
     private int getSmallestDistanceTrajectory(double[][] distances, List<Integer> excludedLineIds){
         double minSum = 10000000;
         int selectedPolyline = -1;
