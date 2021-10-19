@@ -17,12 +17,12 @@ import nl.tue.geometrycore.geometry.linear.PolyLine;
 
 
 class Cluster {
-    List<Integer> item;
-    List<Double> distance;
+    public List<Integer> items;
+    public List<Double> distances;
 
-    Tuple(List<Integer> items, List<Double> distances) {
+    Cluster(List<Integer> items, List<Double> distances) {
         this.items = items;
-        this.distance = distance;
+        this.distances = distances;
     }
 }
 
@@ -174,57 +174,114 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
 
     // Running time for this part looks like n log n to me but idk.
 
-    private List<List<Integer>> mergeClosestClusters(
+    // TODO: check this out?
+    // https://elki-project.github.io/tutorial/hierarchical_clustering
+    private List<Cluster> mergeClosestClusters(
         List<Cluster> clusters,
-        double[][] distances
+        double[][] distances,
+        int targetClusterCount
     ) {
+        int maxPlaceholder = 10000000;
         List<List<Integer>> newClusterItems = new ArrayList();
         List<Integer> mergedClusterIds = new ArrayList();
         for (int i = 0; i < clusters.size(); i++) {
             if (!mergedClusterIds.contains(i)){
-                double minDistance = 1000000;
-                int closestClusterId = 100000;
+                double minDistance = maxPlaceholder;
+                int closestClusterId = maxPlaceholder;
+                Cluster c = clusters.get(i);
                 for (int j = 0; j < c.distances.size(); j++) {
-                    if (c.distances.get(j) < minDistance && i != j) {
+                    logger.info(String.format("Considering i: %d and j: %d", i, j));
+                    logger.info(mergedClusterIds.toString());
+                    if (
+                        c.distances.get(j) < minDistance
+                            && i != j
+                            && !mergedClusterIds.contains(j)
+                            // && targetClusterCount < newClusterItems.size()
+                    ) {
                         minDistance = c.distances.get(j);
                         closestClusterId = j;
+                        mergedClusterIds.add(j);
                     }
                 }
                 List<Integer> mergedClusterItems = new ArrayList();
-                mergedClusterItems.addAll(clusters.get(i).items);
-                mergedClusterItems.addAll(clusters.get(closestClusterId).items);
+                mergedClusterItems.addAll(c.items);
+                if(closestClusterId != maxPlaceholder){
+                    mergedClusterItems.addAll(clusters.get(closestClusterId).items);
+                }
                 newClusterItems.add(mergedClusterItems);
-                mergedClusterIds.add(j);
             }
+            mergedClusterIds.add(i);
         }
-        logger.info(newClusterItems.asString());
-        logger.info(mergedClusterIds.asString());
+        logger.info(newClusterItems.toString());
+        logger.info(String.format("Count: %d", newClusterItems.size()));
+        List<List<Double>> newClusterDistances = new ArrayList();
         for (int i = 0; i < newClusterItems.size(); i++){
-            for (int j=0; i<)
+            List<Double> relatedClusterDistances = new ArrayList();
+            for (int j = 0; j < newClusterItems.size(); j++) {
+                if (i == j) {
+                    double maxDistance = maxPlaceholder;
+                    relatedClusterDistances.add(maxDistance);
+                } else {
+                    double minDistance = maxPlaceholder;
+                    for (int item : newClusterItems.get(j)){
+                        if (distances[i][item] < minDistance) {
+                            minDistance = distances[i][item];
+                        }
+                    }
+                    relatedClusterDistances.add(minDistance);
+                }
+            }
+            newClusterDistances.add(relatedClusterDistances);
         }
+        logger.info(newClusterDistances.toString());
+        List<Cluster> newClusters = new ArrayList();
+        for (int i = 0; i < newClusterItems.size(); i++){
+            newClusters.add(
+                new Cluster(
+                    newClusterItems.get(i), 
+                    newClusterDistances.get(i)
+                )
+            );
+        }
+        return newClusters;
     }
 
-    private List<List<InputPolyLine>> clusterPolylines(
+    private List<List<InputPolyLine>> computePolylineClusters(
         List<InputPolyLine> inputPolylines, 
         double[][] distances,
         int targetClusterCount
     ) {
+        logger.info("computing clusters");
         List<Cluster> lineIdClusters = new ArrayList();
-        int clusterCount = lineIdClusters.size();
         for (InputPolyLine p : inputPolylines) {
+            List<Double> distanceList = new ArrayList<>();
+            for (int i = 0; i < distances[p.index].length; i++) {
+                distanceList.add(distances[p.index][i]);
+            }
             lineIdClusters.add(
                 new Cluster(
                     Arrays.asList(p.index),
-                    Arrays.asList(distances[p.index])
+                    distanceList
                 )
             );
         }
-        while (clusterCount < targetClusterCount) {
-            lineIdClusters = mergeClosestClusters(lineIdClusters, distances);
+        int clusterCount = lineIdClusters.size();
+        while (clusterCount > targetClusterCount) {
+            lineIdClusters = mergeClosestClusters(
+                lineIdClusters, 
+                distances,
+                targetClusterCount);
             clusterCount = lineIdClusters.size();
-            logger.info(clusterCount.toString());
-            logger.info(lineIdClusters.toString());
         }
+        List<List<InputPolyLine>> lineGroups = new ArrayList();
+        for (Cluster cluster : lineIdClusters) {
+            List<InputPolyLine> linesOfGroup = new ArrayList();
+            for (Integer lineId : cluster.items) {
+                linesOfGroup.add(inputPolylines.get(lineId));
+            }
+            lineGroups.add(linesOfGroup);
+        }
+        return lineGroups;
     }
 
     @Override
@@ -240,7 +297,9 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         double[][] distances = computeFrechetDistanceMatrix(simplifiedTrajectories);
 
         // Step 3: find the clustering of the polylines
-        List<List<InputPolyLine>> groupedPolylines = computePolylineGroups(distances, input.polylines, input.k);
+        // List<List<InputPolyLine>> groupedPolylines = computePolylineGroups(distances, input.polylines, input.k);
+        List<List<InputPolyLine>> groupedPolylines = computePolylineClusters(input.polylines, distances, input.k);
+        logger.info(groupedPolylines.toString());
 
         // TODO: Step 4: compute the mean/median over groups
 
@@ -251,6 +310,7 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
             OutputPolyLine outputPolyline = new OutputPolyLine();
             output.polylines.add(outputPolyline);
             List<InputPolyLine> outputGroup = groupedPolylines.get(i);
+            logger.info(outputGroup.toString());
 
             // pretend we get a median computed somehow
             PolyLine medianPolyline = outputGroup.get(0);
