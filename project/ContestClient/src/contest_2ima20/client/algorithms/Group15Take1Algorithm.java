@@ -200,13 +200,13 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
                     ) {
                         minDistance = c.distances.get(j);
                         closestClusterId = j;
-                        mergedClusterIds.add(j);
                     }
                 }
                 List<Integer> mergedClusterItems = new ArrayList();
                 mergedClusterItems.addAll(c.items);
                 if(closestClusterId != maxPlaceholder){
                     mergedClusterItems.addAll(clusters.get(closestClusterId).items);
+                    mergedClusterIds.add(closestClusterId);
                 }
                 newClusterItems.add(mergedClusterItems);
             }
@@ -306,7 +306,7 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         // TODO: Step 5: simplify the output?? (Or not?? it might be handy to compute
         // the mean)
 
-        for (int i = 0; i < input.k; i++) {
+        for (int i = 0; i < input.k && i < groupedPolylines.size(); i++) {
             OutputPolyLine outputPolyline = new OutputPolyLine();
             output.polylines.add(outputPolyline);
             List<InputPolyLine> outputGroup = groupedPolylines.get(i);
