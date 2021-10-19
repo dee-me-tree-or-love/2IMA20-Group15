@@ -189,6 +189,7 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
                 double minDistance = maxPlaceholder;
                 int closestClusterId = maxPlaceholder;
                 Cluster c = clusters.get(i);
+                // find the closest cluster
                 for (int j = 0; j < c.distances.size(); j++) {
                     logger.info(String.format("Considering i: %d and j: %d", i, j));
                     logger.info(mergedClusterIds.toString());
@@ -196,21 +197,26 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
                         c.distances.get(j) < minDistance
                             && i != j
                             && !mergedClusterIds.contains(j)
-                            // && targetClusterCount < newClusterItems.size()
                     ) {
                         minDistance = c.distances.get(j);
                         closestClusterId = j;
                     }
                 }
+                // merge clusters
                 List<Integer> mergedClusterItems = new ArrayList();
                 mergedClusterItems.addAll(c.items);
-                if(closestClusterId != maxPlaceholder){
+                if(
+                    closestClusterId != maxPlaceholder
+                    && targetClusterCount < clusters.size() - mergedClusterIds.size()
+                ){
                     mergedClusterItems.addAll(clusters.get(closestClusterId).items);
                     mergedClusterIds.add(closestClusterId);
                 }
                 newClusterItems.add(mergedClusterItems);
             }
-            mergedClusterIds.add(i);
+            if (!mergedClusterIds.contains(i)){
+                mergedClusterIds.add(i);
+            }
         }
         logger.info(newClusterItems.toString());
         logger.info(String.format("Count: %d", newClusterItems.size()));
