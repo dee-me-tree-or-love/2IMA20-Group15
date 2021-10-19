@@ -18,11 +18,9 @@ import nl.tue.geometrycore.geometry.linear.PolyLine;
 
 class Cluster {
     public List<Integer> items;
-    public List<Double> distances;
 
-    Cluster(List<Integer> items, List<Double> distances) {
+    Cluster(List<Integer> items) {
         this.items = items;
-        this.distances = distances;
     }
 }
 
@@ -49,236 +47,101 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         return ps;
     }
 
-    private double getMinFrechetDistance(double[][] distances) {
-        // TODO: make a better minimal
-        double min = 1000000000;
-        for (int j = 1; j < distances.length; j++) {
-            for (int i = 0; i < j; i++) {
-                double selectedDistance = distances[i][j];
-                if (selectedDistance < min) {
-                    min = selectedDistance;
-                }
-            }
-        }
-        return min;
-    }
-
-    private double getMaxFrechetDistance(double[][] distances) {
-        // TODO: make a better max
-        double max = -1000000000;
-        for (int j = 1; j < distances.length; j++) {
-            for (int i = 0; i < j; i++) {
-                double selectedDistance = distances[i][j];
-                if (selectedDistance > max) {
-                    max = selectedDistance;
-                }
-            }
-        }
-        return max;
-    }
-
-    private int getSmallestDistanceTrajectory(double[][] distances, List<Integer> excludedLineIds) {
-        logger.info(excludedLineIds.toString());
-        double minSum = 10000000;
-        int selectedPolyline = 0;
-        for (int i = 0; i < distances.length; i++) {
-            double sum = 0;
-            for (int j = 0; j < distances.length; j++) {
-                sum += distances[i][j];
-            }
-            if (sum < minSum && !excludedLineIds.contains(i)) {
-                selectedPolyline = i;
-            }
-        }
-        return selectedPolyline;
-    }
-
-    private List<List<Integer>> performGrouping(double[][] distances, double averageDistance,
-            List<Integer> excludedLineIds, List<List<Integer>> groups) {
-        logger.info("Running performGrouping");
-        if (excludedLineIds.size() == distances.length) {
-            return groups;
-        }
-        int q = getSmallestDistanceTrajectory(distances, excludedLineIds);
-        List<Integer> group = new ArrayList<Integer>();
-        for (int i = 0; i < distances.length; i++) {
-            if (distances[q][i] <= averageDistance) {
-                group.add(i);
-            }
-        }
-        groups.add(group);
-        excludedLineIds.addAll(group);
-        return performGrouping(distances, averageDistance, excludedLineIds, groups);
-    }
-
-    private List<List<Integer>> findOptimalGrouping(double[][] distances, double averageDistance, double maxDistance,
-            double minDistance, int targetGroupNumber) {
-        List<List<Integer>> groups = new ArrayList();
-        List<Integer> excludedLineIds = new ArrayList();
-
-        groups = performGrouping(distances, averageDistance, excludedLineIds, groups);
-        if (groups.size() == targetGroupNumber) {
-            return groups;
-        }
-
-        double newAverageDistance, newMaxDistance, newMinDistance = 0;
-        if (groups.size() > targetGroupNumber) {
-            newMinDistance = averageDistance;
-            newAverageDistance = (averageDistance + maxDistance) / 2;
-            newMaxDistance = maxDistance;
-        } else {
-            newMinDistance = minDistance;
-            newAverageDistance = (averageDistance + minDistance) / 2;
-            newMaxDistance = averageDistance;
-        }
-        return findOptimalGrouping(distances, newAverageDistance, newMaxDistance, newMinDistance, targetGroupNumber);
-    }
-
-    private List<List<InputPolyLine>> computePolylineGroups(double[][] distances, List<InputPolyLine> inputPolylines,
-            int k) {
-        double maxDistance = getMaxFrechetDistance(distances);
-        double minDistance = getMinFrechetDistance(distances);
-        double averageDistance = (maxDistance + minDistance) / 2;
-        List<List<Integer>> idGroups = findOptimalGrouping(distances, averageDistance, maxDistance, minDistance, k);
-        List<List<InputPolyLine>> lineGroups = new ArrayList();
-        for (List<Integer> group : idGroups) {
-            List<InputPolyLine> linesOfGroup = new ArrayList();
-            for (Integer id : group) {
-                linesOfGroup.add(inputPolylines.get(id));
-            }
-            lineGroups.add(linesOfGroup);
-        }
-        return lineGroups;
-    }
-
-    // === Binary search for grouping ===
-    // 1. Find the pair of lines with minimum dF between each other, call this
-    // distance dMin. Do the same for the pair of lines with maximum dF, call it
-    // dMax.
-    // 2. Take the average of dMin and dMax, let's call it dAvg.
-    // 3. Pick the line Q with the lowest total summed dF in the matrix, add it to a
-    // new group.
-    // 4. Add all lines whose dF to Q is smaller than dAvg to this group.
-    // 5. Remove the whole group you just constructed from consideration.
-    // 6. Pick a new line P with the lowest total summed dF among the lines left in
-    // the matrix, construct a group for it in the same way we did for Q, remove it
-    // from consideration.
-    // 7. Repeat this process until all lines are part of a group.
-    // 8. Case distinction for binary search:
-    // - If the number of groups is greater than k, pick a new dAvg as the average
-    // of the old dAvg and dMax, then do steps 3 through 7 on a "fresh" matrix with
-    // this dAvg.
-    // - If the number of groups is smaller than k, pick the new dAvg between dMin
-    // and the old dAvg instead (and do the steps).
-    // - If the number of groups is exactly k, we have found a nice grouping.
-
-    // Running time for this part looks like n log n to me but idk.
-
-    // TODO: check this out?
-    // https://elki-project.github.io/tutorial/hierarchical_clustering
     private List<Cluster> mergeClosestClusters(
         List<Cluster> clusters,
         double[][] distances,
         int targetClusterCount
     ) {
+
+        /**
+            > Merging -> 
+                1. from all clusters find two such that Frechet distance between any 2 of their trajectories is the smallest
+                2. merge the two identified clusters C_1, C_2 into a new C'
+                3. return a new set of Clusters as (Cs \ {C_1, C_2}) U {C'} 
+         */
         int maxPlaceholder = 10000000;
-        List<List<Integer>> newClusterItems = new ArrayList();
-        List<Integer> mergedClusterIds = new ArrayList();
-        for (int i = 0; i < clusters.size(); i++) {
-            if (!mergedClusterIds.contains(i)){
-                double minDistance = maxPlaceholder;
-                int closestClusterId = maxPlaceholder;
-                Cluster c = clusters.get(i);
-                // find the closest cluster
-                for (int j = 0; j < c.distances.size(); j++) {
-                    logger.info(String.format("Considering i: %d and j: %d", i, j));
-                    logger.info(mergedClusterIds.toString());
-                    if (
-                        c.distances.get(j) < minDistance
-                            && i != j
-                            && !mergedClusterIds.contains(j)
-                    ) {
-                        minDistance = c.distances.get(j);
-                        closestClusterId = j;
+
+        int idSmallestClusterA = maxPlaceholder;
+        int idSmallestClusterB = maxPlaceholder;
+        double minClusterDistance = maxPlaceholder;
+
+        // Find smallest cluster pair
+        for (int i = 0; i < clusters.size(); i++){
+            for (int j = 0; j < clusters.size(); j++) {
+                if (i < j){
+                    Cluster c_A = clusters.get(i);
+                    Cluster c_B = clusters.get(j);
+                    // Check if pair of clusters i,j is the closest by compairing all included items of the cluster
+                    logger.info(String.format("Considering %d -> %d", i, j));
+                    for (int idItemOfA: c_A.items){
+                        for (int idItemOfB: c_B.items) {
+                            double itemDistance = distances[idItemOfA][idItemOfB];
+                            logger.info(String.format("Item distance %f", itemDistance));
+                            if (
+                                itemDistance < minClusterDistance
+                                // TODO: maybe not needed?
+                                && idItemOfA != idItemOfB
+                            ) {
+                                minClusterDistance = itemDistance;
+                                idSmallestClusterA = i;
+                                idSmallestClusterB = j;
+                            }
+                        }
                     }
                 }
-                // merge clusters
-                List<Integer> mergedClusterItems = new ArrayList();
-                mergedClusterItems.addAll(c.items);
-                if(
-                    closestClusterId != maxPlaceholder
-                    && targetClusterCount < clusters.size() - mergedClusterIds.size()
-                ){
-                    mergedClusterItems.addAll(clusters.get(closestClusterId).items);
-                    mergedClusterIds.add(closestClusterId);
-                }
-                newClusterItems.add(mergedClusterItems);
             }
-            if (!mergedClusterIds.contains(i)){
-                mergedClusterIds.add(i);
+        }
+        logger.info(String.format("Smallest %d -> %d : %f", idSmallestClusterA, idSmallestClusterB, minClusterDistance));
+
+
+        // Merge 2 closest clusters
+        List<List<Integer>> newClusterItems = new ArrayList();
+        List<Integer> mergedClusterItems = new ArrayList();
+        mergedClusterItems.addAll(clusters.get(idSmallestClusterA).items);
+        mergedClusterItems.addAll(clusters.get(idSmallestClusterB).items);
+        newClusterItems.add(mergedClusterItems);
+        
+        // Add remaining untouched clusters
+        for (int i = 0; i < clusters.size(); i++){
+            if (i != idSmallestClusterA && i != idSmallestClusterB){
+                newClusterItems.add(clusters.get(i).items);
             }
         }
         logger.info(newClusterItems.toString());
         logger.info(String.format("Count: %d", newClusterItems.size()));
-        List<List<Double>> newClusterDistances = new ArrayList();
-        for (int i = 0; i < newClusterItems.size(); i++){
-            List<Double> relatedClusterDistances = new ArrayList();
-            for (int j = 0; j < newClusterItems.size(); j++) {
-                if (i == j) {
-                    double maxDistance = maxPlaceholder;
-                    relatedClusterDistances.add(maxDistance);
-                } else {
-                    double minDistance = maxPlaceholder;
-                    for (int item : newClusterItems.get(j)){
-                        if (distances[i][item] < minDistance) {
-                            minDistance = distances[i][item];
-                        }
-                    }
-                    relatedClusterDistances.add(minDistance);
-                }
-            }
-            newClusterDistances.add(relatedClusterDistances);
-        }
-        logger.info(newClusterDistances.toString());
+        
+        // Assembling the new cluster set
         List<Cluster> newClusters = new ArrayList();
         for (int i = 0; i < newClusterItems.size(); i++){
-            newClusters.add(
-                new Cluster(
-                    newClusterItems.get(i), 
-                    newClusterDistances.get(i)
-                )
-            );
+            newClusters.add(new Cluster(newClusterItems.get(i)));
         }
         return newClusters;
     }
 
-    private List<List<InputPolyLine>> computePolylineClusters(
-        List<InputPolyLine> inputPolylines, 
+    private List<Cluster> clusterPolylinesHierarchically(
+        List<InputPolyLine> inputPolylines,
         double[][] distances,
         int targetClusterCount
-    ) {
-        logger.info("computing clusters");
-        List<Cluster> lineIdClusters = new ArrayList();
+    ){
+        List<Cluster> clusters = new ArrayList();
         for (InputPolyLine p : inputPolylines) {
-            List<Double> distanceList = new ArrayList<>();
-            for (int i = 0; i < distances[p.index].length; i++) {
-                distanceList.add(distances[p.index][i]);
-            }
-            lineIdClusters.add(
-                new Cluster(
-                    Arrays.asList(p.index),
-                    distanceList
-                )
-            );
+            clusters.add(new Cluster(Arrays.asList(p.index)));
         }
-        int clusterCount = lineIdClusters.size();
+        int clusterCount = clusters.size();
         while (clusterCount > targetClusterCount) {
-            lineIdClusters = mergeClosestClusters(
-                lineIdClusters, 
+            clusters = mergeClosestClusters(
+                clusters,
                 distances,
                 targetClusterCount);
-            clusterCount = lineIdClusters.size();
+            clusterCount = clusters.size();
         }
+        return clusters;
+    }
+
+    private List<List<InputPolyLine>> clustersToPolylineGroups(
+        List<InputPolyLine> inputPolylines,
+        List<Cluster> lineIdClusters
+    ){
         List<List<InputPolyLine>> lineGroups = new ArrayList();
         for (Cluster cluster : lineIdClusters) {
             List<InputPolyLine> linesOfGroup = new ArrayList();
@@ -288,6 +151,23 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
             lineGroups.add(linesOfGroup);
         }
         return lineGroups;
+    }
+
+    private List<List<InputPolyLine>> computePolylineGroupings(
+        List<InputPolyLine> inputPolylines, 
+        double[][] distances,
+        int targetClusterCount
+    ) {
+        logger.info("computing clusters");
+        List<Cluster> lineIdClusters = clusterPolylinesHierarchically(
+            inputPolylines,
+            distances,
+            targetClusterCount
+        );
+        return clustersToPolylineGroups(
+            inputPolylines,
+            lineIdClusters
+        );
     }
 
     @Override
@@ -303,8 +183,7 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         double[][] distances = computeFrechetDistanceMatrix(simplifiedTrajectories);
 
         // Step 3: find the clustering of the polylines
-        // List<List<InputPolyLine>> groupedPolylines = computePolylineGroups(distances, input.polylines, input.k);
-        List<List<InputPolyLine>> groupedPolylines = computePolylineClusters(input.polylines, distances, input.k);
+        List<List<InputPolyLine>> groupedPolylines = computePolylineGroupings(input.polylines, distances, input.k);
         logger.info(groupedPolylines.toString());
 
         // TODO: Step 4: compute the mean/median over groups
