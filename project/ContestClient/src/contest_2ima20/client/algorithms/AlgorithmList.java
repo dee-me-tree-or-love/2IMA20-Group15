@@ -18,6 +18,7 @@ public class AlgorithmList {
             new ArbitraryAlgorithm(),
             new PolylineSimplificationAlgorithm(),
             new Group15Take1Algorithm(),
+            new Take2Algorithm(),
         };
     }
 }

@@ -11,17 +11,17 @@ import contest_2ima20.core.trajectorysummarization.Input;
 import contest_2ima20.core.trajectorysummarization.InputPolyLine;
 import contest_2ima20.core.trajectorysummarization.Output;
 import contest_2ima20.core.trajectorysummarization.OutputPolyLine;
+import contest_2ima20.client.trajectorysummarization.PolylineSimplification;
 import contest_2ima20.client.trajectorysummarization.Cluster;
 import java.lang.*;
 import java.util.*;
 import nl.tue.geometrycore.geometry.linear.PolyLine;
 
-
 /**
  *
  * @author Group15
  */
-public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
+public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
     private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("take1algo");
 
     private double[][] computeFrechetDistanceMatrix(List<? extends PolyLine> inputPolylines) {
@@ -185,20 +185,22 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         // the mean)
 
         for (int i = 0; i < input.k && i < groupedPolylines.size(); i++) {
-            OutputPolyLine outputPolyline = new OutputPolyLine();
-            output.polylines.add(outputPolyline);
             List<InputPolyLine> outputGroup = groupedPolylines.get(i);
             logger.info(outputGroup.toString());
 
             // pretend we get a median computed somehow
-            PolyLine medianPolyline = outputGroup.get(0);
-            for (int j = 0; j < medianPolyline.vertexCount() && j < input.c; j++) {
-                outputPolyline.addVertex(medianPolyline.vertex(j).clone());
-            }
+            InputPolyLine medianPolyline = outputGroup.get(0);
+            // Simplify the thing
+            // TODO: does pSimple need to be reinstantiated
+            // every time or can it exist outside of for loop?
+            PolylineSimplification pSimple = new PolylineSimplification();
+            OutputPolyLine simplifiedOutputPolyline = pSimple.simplifyFrechetVertices(medianPolyline, input.c);
+            logger.info(simplifiedOutputPolyline.toString());
+            output.polylines.add(simplifiedOutputPolyline);
 
             // map all input polylines to the outputted median
             for (InputPolyLine p : outputGroup) {
-                output.input_to_output[p.index] = outputPolyline;
+                output.input_to_output[p.index] = simplifiedOutputPolyline;
             }
         }
 
