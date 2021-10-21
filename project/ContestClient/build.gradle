@@ -1,11 +1,7 @@
 apply plugin: 'application'
 
 application {
-    mainClass = 'contest_2ima20.Main' 
-}
-
-java {
-    withSourcesJar()
+    mainClass = 'contest_2ima20.Main'
 }
 
 sourceSets {
