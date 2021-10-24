@@ -4,6 +4,8 @@
 .project
 **/out/*
 **/build/*
+**/bin/**
+.classpath
 
 # IDEs
 .vscode
