@@ -15,7 +15,7 @@ import nl.tue.geometrycore.geometry.linear.PolyLine;
 
 public class PolylineSimplification {
     
-    public OutputPolyLine simplifyFrechetEpsilon(InputPolyLine Q, double epsilon) {
+    public OutputPolyLine simplifyFrechetEpsilon(PolyLine Q, double epsilon) {
          
         OutputPolyLine O = new OutputPolyLine();
         // Create graph of shortcuts
@@ -47,7 +47,7 @@ public class PolylineSimplification {
     }
 
     
-    public OutputPolyLine simplifyFrechetVertices(InputPolyLine Q, int c) {
+    public OutputPolyLine simplifyFrechetVertices(PolyLine Q, int c) {
         //Binary search
         OutputPolyLine o = null;
         OutputPolyLine lastValid = null;
