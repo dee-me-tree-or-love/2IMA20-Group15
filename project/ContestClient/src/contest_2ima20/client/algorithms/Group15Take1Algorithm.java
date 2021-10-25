@@ -198,13 +198,14 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
             
         }
         return averagePolyline;
-    }
+    } 
 
     @Override
     public Output doAlgorithm(Input input) {
         // Initialization steps
         // creating an output
         Output output = new Output(input);
+        output.setClusters(input.k);
 
         // Step 1: get simplification / clusters of related trajectories???
         List<? extends PolyLine> simplifiedTrajectories = simplifyInput(input.polylines);
@@ -223,25 +224,36 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
 
         for (int i = 0; i < input.k && i < groupedPolylines.size(); i++) {
             OutputPolyLine outputPolyline = new OutputPolyLine();
-            output.polylines.add(outputPolyline);
+            //output.polylines.add(outputPolyline);
             List<InputPolyLine> outputGroup = groupedPolylines.get(i);
             logger.info(outputGroup.toString());
 
             // pretend we get a median computed somehow
             //PolyLine medianPolyline = outputGroup.get(0);
+            for (int j = 0; j < outputGroup.size(); j++) {
+                OutputPolyLine groupOutputPolyline = new OutputPolyLine();  
+                InputPolyLine Q = outputGroup.get(j);
+                for (int k = 0; k < Q.vertexCount(); k++) {
+                    groupOutputPolyline.addVertex(Q.vertex(k).clone());
+                }
+                groupOutputPolyline.setCluster(i);
+                output.polylines.add(groupOutputPolyline);
+                output.input_to_output[Q.index] = groupOutputPolyline;
+            }
+            
             PolyLine medianPolyline = computeMeanPoLyline(outputGroup); 
             for (int j = 0; j < medianPolyline.vertexCount() && j < input.c; j++) {
-            //for (int j = 0; j < medianPolyline.vertexCount(); j++) {
                 outputPolyline.addVertex(medianPolyline.vertex(j).clone());
             }
+            output.polylines.add(outputPolyline);
 
             // map all input polylines to the outputted median
-            for (InputPolyLine p : outputGroup) {
+            /*for (InputPolyLine p : outputGroup) {
                 output.input_to_output[p.index] = outputPolyline;
-            }
+            }*/
         }
 
         return output;
-    }
+    } 
 
 }

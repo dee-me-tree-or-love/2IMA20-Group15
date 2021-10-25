@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.*;
 import nl.tue.geometrycore.geometry.Vector;
 import nl.tue.geometrycore.geometry.linear.Rectangle;
 import nl.tue.geometrycore.geometryrendering.GeometryRenderer;
@@ -29,11 +30,28 @@ public class Output extends Solution {
     public Input input;
     public OutputPolyLine[] input_to_output; // index-based map, based on the index storted in InputPolyline
     public List<OutputPolyLine> polylines;
+    
+    //TODO: Remove all below, it is just for TESTING 
+    public int clusters = 1;
+    Set<Color> distinctColors = new HashSet<Color>();
+
+
+    ////////////////////////////////////////////////
 
     public Output(Input input) {
         this.input = input;
         input_to_output = new OutputPolyLine[input.polylines.size()];
         polylines = new ArrayList();
+    }
+
+    public Output(Input input, int group) {
+        this.input = input;
+        input_to_output = new OutputPolyLine[input.polylines.size()];
+        polylines = new ArrayList();
+    }
+
+    public void setClusters(int kNumber) {
+        this.clusters = kNumber;
     }
 
     @Override
@@ -95,10 +113,37 @@ public class Output extends Solution {
     public void draw(GeometryRenderer render) {
         input.draw(render);
         render.setSizeMode(SizeMode.VIEW);
-        render.setStroke(ExtendedColors.darkOrange, 2, Dashing.SOLID);
         render.setForwardArrowStyle(ArrowStyle.TRIANGLE_SOLID, 2);
         render.setFill(null, Hashures.SOLID);
-        render.draw(polylines);
+        //Group by colour
+        List<OutputPolyLine>[] polylinesByGroup = new ArrayList[clusters];
+        List<OutputPolyLine> outputPolylines = new ArrayList();
+        for (int i = 0; i < clusters; i ++) {
+            polylinesByGroup[i] = new ArrayList<OutputPolyLine>();
+        }
+        while (distinctColors.size() != clusters) {
+            Color color = generateRandomColor();
+            distinctColors.add(color);
+        }
+        List<Color> colors = new ArrayList<Color>(distinctColors);
+
+        for (OutputPolyLine p : polylines) {
+            int cluster = p.getCluster();
+            if (cluster > -1) {
+                List <OutputPolyLine> o = polylinesByGroup[cluster];
+                o.add(p);
+            } else {
+                outputPolylines.add(p);
+            }
+        }
+
+        for (int i = 0 ; i < clusters; i++) {
+            render.setStroke(colors.get(i), 2, Dashing.SOLID);
+            render.draw(polylinesByGroup[i]);
+        }
+        
+        render.setStroke(Color.black, 2, Dashing.SOLID);
+        render.draw(outputPolylines);
     }
 
     @Override
@@ -106,5 +151,15 @@ public class Output extends Solution {
         Rectangle R = Rectangle.byBoundingBox(polylines);
         R.includeGeometry(input.getBoundingBox());
         return R;
+    }
+
+    public Color generateRandomColor() {
+        Random random = new Random();
+        float hue = random.nextFloat();
+        // Saturation between 0.1 and 0.3
+        float saturation = (random.nextInt(2000) + 1000) / 10000f;
+        float luminance = 0.9f;
+        Color color = Color.getHSBColor(hue, saturation, luminance);
+        return color;
     }
 }

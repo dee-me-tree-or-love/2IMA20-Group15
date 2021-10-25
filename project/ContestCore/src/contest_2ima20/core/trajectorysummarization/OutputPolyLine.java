@@ -12,5 +12,14 @@ import nl.tue.geometrycore.geometry.linear.PolyLine;
  * @author Wouter Meulemans (w.meulemans@tue.nl)
  */
 public class OutputPolyLine extends PolyLine {
+
+    public int cluster = -1;
     
+    public void setCluster(int clusterNum) {
+        this.cluster = clusterNum;
+    }
+
+    public int getCluster() {
+        return this.cluster;
+    }
 }

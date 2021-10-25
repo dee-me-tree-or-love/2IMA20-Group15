@@ -1,7 +1,8 @@
 rootProject.name = '2ima20-group-15'
 
+include 'contest-core'
+project(':contest-core').projectDir = file('project/ContestCore')
+
 include 'contest-client'
 project(':contest-client').projectDir = file('project/ContestClient')
 
-include 'contest-core'
-project(':contest-core').projectDir = file('project/ContestCore')
