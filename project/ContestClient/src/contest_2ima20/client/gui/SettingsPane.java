@@ -242,9 +242,15 @@ public class SettingsPane extends JPanel implements ActionListener {
                 return;
             }
             String[] parts = file.getName().split("\\W");
-            if (parts.length == 3) {                                  //two parts plus extension
-                String problemName = file.getName().split("\\W")[0];
-                String solutionAlgo = file.getName().split("\\W")[1];
+            if (parts.length >= 3) {                                  //two parts plus extension
+                // assume algorithms name is a single word
+                String problemName = parts[0];
+                for (int i = 1; i < parts.length - 2; i++) {
+                    problemName += "-" + parts[i];
+                }
+                String solutionAlgo = parts[parts.length-2]; // before last, last is extension
+                System.out.println("problem "+problemName);
+                System.out.println("algo "+solutionAlgo);
                 Problem p = parent.getProblemsPanel().getProblem(problemName);
                 boolean correctAlgo = false;
                 for (Algorithm algo : AlgorithmList.getAlgorithms()) {
