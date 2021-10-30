@@ -12,19 +12,12 @@ import contest_2ima20.core.trajectorysummarization.InputPolyLine;
 import contest_2ima20.core.trajectorysummarization.Output;
 import contest_2ima20.core.trajectorysummarization.OutputPolyLine;
 import contest_2ima20.client.trajectorysummarization.PolylineSimplification;
+import contest_2ima20.client.trajectorysummarization.Cluster;
 import nl.tue.geometrycore.geometry.Vector;
 import java.lang.*;
 import java.util.*;
 import nl.tue.geometrycore.geometry.linear.PolyLine;
 
-
-class Cluster {
-    public List<Integer> items;
-
-    Cluster(List<Integer> items) {
-        this.items = items;
-    }
-}
 
 /**
  *
