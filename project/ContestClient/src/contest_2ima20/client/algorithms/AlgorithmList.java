@@ -19,6 +19,7 @@ public class AlgorithmList {
             new PolylineSimplificationAlgorithm(),
             new Group15Take1Algorithm(),
             new Take2Algorithm(),
+            new ClusterSkimMeanSimplifyAlgorithm()
         };
     }
 }
