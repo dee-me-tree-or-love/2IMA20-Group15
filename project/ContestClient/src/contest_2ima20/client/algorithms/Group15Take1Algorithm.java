@@ -11,7 +11,9 @@ import contest_2ima20.core.trajectorysummarization.Input;
 import contest_2ima20.core.trajectorysummarization.InputPolyLine;
 import contest_2ima20.core.trajectorysummarization.Output;
 import contest_2ima20.core.trajectorysummarization.OutputPolyLine;
+import contest_2ima20.client.trajectorysummarization.PolylineSimplification;
 import contest_2ima20.client.trajectorysummarization.Cluster;
+import nl.tue.geometrycore.geometry.Vector;
 import java.lang.*;
 import java.util.*;
 import nl.tue.geometrycore.geometry.linear.PolyLine;
@@ -163,6 +165,36 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         );
     }
 
+    private PolyLine computeMeanPoLyline(List<InputPolyLine> polyLineGroup) {
+        
+        logger.info("computing clusters");;
+        double sampleRate = 10; // We can change this
+        double fraction = 1/sampleRate;
+        PolyLine averagePolyline = new PolyLine();
+       
+        for (int i = 0; i < sampleRate; i++) {
+            List<Vector> samplePoints = new ArrayList<Vector> ();
+            for (int j = 0; j < polyLineGroup.size(); j++) {
+                Vector point = polyLineGroup.get(j).getPointAt(fraction);
+                samplePoints.add(point);
+            }
+
+            double sumX = 0;
+            double sumY = 0;
+
+            for (int j = 0; j < samplePoints.size(); j++) {
+                sumX += samplePoints.get(j).getX();
+                sumY += samplePoints.get(j).getY();
+            }
+
+            Vector mean = new Vector(sumX/samplePoints.size(), sumY/samplePoints.size());
+            averagePolyline.addVertex(mean);
+            fraction += 1/sampleRate;
+            
+        }
+        return averagePolyline;
+    }
+
     @Override
     public Output doAlgorithm(Input input) {
         // Initialization steps
@@ -179,23 +211,19 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         List<List<InputPolyLine>> groupedPolylines = computePolylineGroupings(input.polylines, distances, input.k);
         logger.info(groupedPolylines.toString());
 
-        // TODO: Step 4: compute the mean/median over groups
-
-        // TODO: Step 5: simplify the output?? (Or not?? it might be handy to compute
-        // the mean)
-
         for (int i = 0; i < input.k && i < groupedPolylines.size(); i++) {
-            OutputPolyLine outputPolyline = new OutputPolyLine();
-            output.polylines.add(outputPolyline);
+
             List<InputPolyLine> outputGroup = groupedPolylines.get(i);
             logger.info(outputGroup.toString());
 
-            // pretend we get a median computed somehow
-            PolyLine medianPolyline = outputGroup.get(0);
-            for (int j = 0; j < medianPolyline.vertexCount() && j < input.c; j++) {
-                outputPolyline.addVertex(medianPolyline.vertex(j).clone());
-            }
+            // Step 4: compute the mean/median over groups
+            PolyLine medianPolyline = computeMeanPoLyline(outputGroup); 
 
+            // Step 5: simplify the output?? (Or not?? it might be handy to compute the mean)
+            PolylineSimplification pSimple = new PolylineSimplification();
+            OutputPolyLine outputPolyline = pSimple.simplifyFrechetVertices(medianPolyline, input.c);
+
+            output.polylines.add(outputPolyline);
             // map all input polylines to the outputted median
             for (InputPolyLine p : outputGroup) {
                 output.input_to_output[p.index] = outputPolyline;
