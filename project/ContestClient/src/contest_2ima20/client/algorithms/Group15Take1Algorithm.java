@@ -166,12 +166,7 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
     }
 
     private PolyLine computeMeanPoLyline(List<InputPolyLine> polyLineGroup) {
-<<<<<<< HEAD
         logger.info("computing clusters");
-=======
-        
-        logger.info("computing clusters");;
->>>>>>> 142b1426e4424af28e38f72300865eb8a13af2b8
         double sampleRate = 10; // We can change this
         double fraction = 0;
         PolyLine averagePolyline = new PolyLine();
