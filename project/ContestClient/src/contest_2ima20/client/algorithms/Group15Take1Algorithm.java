@@ -43,21 +43,6 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
         return ps;
     }
 
-    private List<List<InputPolyLine>> clustersToPolylineGroups(
-        List<InputPolyLine> inputPolylines,
-        List<Cluster> lineIdClusters
-    ){
-        List<List<InputPolyLine>> lineGroups = new ArrayList();
-        for (Cluster cluster : lineIdClusters) {
-            List<InputPolyLine> linesOfGroup = new ArrayList();
-            for (Integer lineId : cluster.items) {
-                linesOfGroup.add(inputPolylines.get(lineId));
-            }
-            lineGroups.add(linesOfGroup);
-        }
-        return lineGroups;
-    }
-
     private List<List<InputPolyLine>> computePolylineGroupings(
         List<InputPolyLine> inputPolylines, 
         double[][] distances,
@@ -73,6 +58,21 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
             inputPolylines,
             lineIdClusters
         );
+    }
+
+    private List<List<InputPolyLine>> clustersToPolylineGroups(
+        List<InputPolyLine> inputPolylines,
+        List<Cluster> lineIdClusters
+    ){
+        List<List<InputPolyLine>> lineGroups = new ArrayList();
+        for (Cluster cluster : lineIdClusters) {
+            List<InputPolyLine> linesOfGroup = new ArrayList();
+            for (Integer lineId : cluster.items) {
+                linesOfGroup.add(inputPolylines.get(lineId));
+            }
+            lineGroups.add(linesOfGroup);
+        }
+        return lineGroups;
     }
 
     private PolyLine computeMeanPoLyline(List<InputPolyLine> polyLineGroup) {
