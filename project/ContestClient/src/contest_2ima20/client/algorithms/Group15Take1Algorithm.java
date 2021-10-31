@@ -12,8 +12,8 @@ import contest_2ima20.core.trajectorysummarization.InputPolyLine;
 import contest_2ima20.core.trajectorysummarization.Output;
 import contest_2ima20.core.trajectorysummarization.OutputPolyLine;
 import contest_2ima20.client.trajectorysummarization.PolylineSimplification;
-import contest_2ima20.client.trajectorysummarization.Cluster;
 import contest_2ima20.client.trajectorysummarization.HierarchicalClustering;
+import contest_2ima20.client.trajectorysummarization.Cluster;
 import nl.tue.geometrycore.geometry.Vector;
 import java.lang.*;
 import java.util.*;
@@ -76,13 +76,13 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
     }
 
     private PolyLine computeMeanPoLyline(List<InputPolyLine> polyLineGroup) {
-        
-        logger.info("computing clusters");;
+        logger.info("computing clusters");
         double sampleRate = 10; // We can change this
-        double fraction = 1/sampleRate;
+        double fraction = 0;
         PolyLine averagePolyline = new PolyLine();
        
-        for (int i = 0; i < sampleRate; i++) {
+        for (int i = 0; i < sampleRate + 1; i++) {
+            fraction = i/sampleRate;
             List<Vector> samplePoints = new ArrayList<Vector> ();
             for (int j = 0; j < polyLineGroup.size(); j++) {
                 Vector point = polyLineGroup.get(j).getPointAt(fraction);
@@ -98,9 +98,7 @@ public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
             }
 
             Vector mean = new Vector(sumX/samplePoints.size(), sumY/samplePoints.size());
-            averagePolyline.addVertex(mean);
-            fraction += 1/sampleRate;
-            
+            averagePolyline.addVertex(mean); 
         }
         return averagePolyline;
     }
