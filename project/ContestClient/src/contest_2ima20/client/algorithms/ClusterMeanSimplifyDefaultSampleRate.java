@@ -23,8 +23,9 @@ import nl.tue.geometrycore.geometry.linear.PolyLine;
  *
  * @author Group15
  */
-public class Group15Take1Algorithm extends TrajectorySummarizationAlgorithm {
-    private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("take1algo");
+public class ClusterMeanSimplifyDefaultSampleRate extends TrajectorySummarizationAlgorithm {
+    private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("cluster_mean_simplify_algo");
+    protected double sampleRate = 30;
 
     private double[][] computeFrechetDistanceMatrix(List<? extends PolyLine> inputPolylines) {
         double[][] distances = new double[inputPolylines.size()][inputPolylines.size()];
