@@ -46,7 +46,7 @@ public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
         double[][] distances,
         int targetClusterCount
     ) {
-        logger.info("computing clusters");
+        // logger.info("computing clusters");
         HierarchicalClustering clusterBuilder = new HierarchicalClustering(distances);
         List<Cluster> lineIdClusters = clusterBuilder.clusterInputPolylines(
             inputPolylines,
@@ -87,7 +87,7 @@ public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
 
         // Step 3: find the clustering of the polylines
         List<List<InputPolyLine>> groupedPolylines = computePolylineGroupings(input.polylines, distances, input.k);
-        logger.info(groupedPolylines.toString());
+        // // logger.info(groupedPolylines.toString());
 
         // TODO: Step 4: compute the mean/median over groups
 
@@ -96,7 +96,7 @@ public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
 
         for (int i = 0; i < input.k && i < groupedPolylines.size(); i++) {
             List<InputPolyLine> outputGroup = groupedPolylines.get(i);
-            logger.info(outputGroup.toString());
+            // // logger.info(outputGroup.toString());
 
             // pretend we get a median computed somehow
             InputPolyLine medianPolyline = outputGroup.get(0);
@@ -105,7 +105,7 @@ public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
             // every time or can it exist outside of for loop?
             PolylineSimplification pSimple = new PolylineSimplification();
             OutputPolyLine simplifiedOutputPolyline = pSimple.simplifyFrechetVertices(medianPolyline, input.c);
-            logger.info(simplifiedOutputPolyline.toString());
+            // // logger.info(simplifiedOutputPolyline.toString());
             output.polylines.add(simplifiedOutputPolyline);
 
             // map all input polylines to the outputted median
