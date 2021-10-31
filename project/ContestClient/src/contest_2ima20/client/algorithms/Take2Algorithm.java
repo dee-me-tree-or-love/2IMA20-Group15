@@ -65,11 +65,11 @@ public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
                     Cluster c_A = clusters.get(i);
                     Cluster c_B = clusters.get(j);
                     // Check if pair of clusters i,j is the closest by compairing all included items of the cluster
-                    logger.info(String.format("Considering %d -> %d", i, j));
+                    // logger.info(String.format("Considering %d -> %d", i, j));
                     for (int idItemOfA: c_A.items){
                         for (int idItemOfB: c_B.items) {
                             double itemDistance = distances[idItemOfA][idItemOfB];
-                            logger.info(String.format("Item distance %f", itemDistance));
+                            // logger.info(String.format("Item distance %f", itemDistance));
                             if (
                                 itemDistance < minClusterDistance
                                 // TODO: maybe not needed?
@@ -84,7 +84,7 @@ public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
                 }
             }
         }
-        logger.info(String.format("Smallest %d -> %d : %f", idSmallestClusterA, idSmallestClusterB, minClusterDistance));
+        // logger.info(String.format("Smallest %d -> %d : %f", idSmallestClusterA, idSmallestClusterB, minClusterDistance));
 
 
         // Merge 2 closest clusters
@@ -100,8 +100,8 @@ public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
                 newClusterItems.add(clusters.get(i).items);
             }
         }
-        logger.info(newClusterItems.toString());
-        logger.info(String.format("Count: %d", newClusterItems.size()));
+        // logger.info(newClusterItems.toString());
+        // logger.info(String.format("Count: %d", newClusterItems.size()));
         
         // Assembling the new cluster set
         List<Cluster> newClusters = new ArrayList();
@@ -151,7 +151,7 @@ public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
         double[][] distances,
         int targetClusterCount
     ) {
-        logger.info("computing clusters");
+        // logger.info("computing clusters");
         List<Cluster> lineIdClusters = clusterPolylinesHierarchically(
             inputPolylines,
             distances,
@@ -177,7 +177,7 @@ public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
 
         // Step 3: find the clustering of the polylines
         List<List<InputPolyLine>> groupedPolylines = computePolylineGroupings(input.polylines, distances, input.k);
-        logger.info(groupedPolylines.toString());
+        // logger.info(groupedPolylines.toString());
 
         // TODO: Step 4: compute the mean/median over groups
 
@@ -186,7 +186,7 @@ public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
 
         for (int i = 0; i < input.k && i < groupedPolylines.size(); i++) {
             List<InputPolyLine> outputGroup = groupedPolylines.get(i);
-            logger.info(outputGroup.toString());
+            // logger.info(outputGroup.toString());
 
             // pretend we get a median computed somehow
             InputPolyLine medianPolyline = outputGroup.get(0);
@@ -195,7 +195,7 @@ public class Take2Algorithm extends TrajectorySummarizationAlgorithm {
             // every time or can it exist outside of for loop?
             PolylineSimplification pSimple = new PolylineSimplification();
             OutputPolyLine simplifiedOutputPolyline = pSimple.simplifyFrechetVertices(medianPolyline, input.c);
-            logger.info(simplifiedOutputPolyline.toString());
+            // logger.info(simplifiedOutputPolyline.toString());
             output.polylines.add(simplifiedOutputPolyline);
 
             // map all input polylines to the outputted median
