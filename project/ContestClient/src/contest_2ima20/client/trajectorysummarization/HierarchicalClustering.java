@@ -41,11 +41,11 @@ public class HierarchicalClustering {
                     Cluster c_A = clusters.get(i);
                     Cluster c_B = clusters.get(j);
                     // Check if pair of clusters i,j is the closest by compairing all included items of the cluster
-                    logger.info(String.format("Considering %d -> %d", i, j));
+                    // logger.info(String.format("Considering %d -> %d", i, j));
                     for (int idItemOfA: c_A.items){
                         for (int idItemOfB: c_B.items) {
                             double itemDistance = this.distances[idItemOfA][idItemOfB];
-                            logger.info(String.format("Item distance %f", itemDistance));
+                            // logger.info(String.format("Item distance %f", itemDistance));
                             if (
                                 itemDistance < minClusterDistance
                                 // TODO: maybe not needed?
@@ -60,7 +60,7 @@ public class HierarchicalClustering {
                 }
             }
         }
-        logger.info(String.format("Smallest %d -> %d : %f", idSmallestClusterA, idSmallestClusterB, minClusterDistance));
+        // logger.info(String.format("Smallest %d -> %d : %f", idSmallestClusterA, idSmallestClusterB, minClusterDistance));
 
 
         // Merge 2 closest clusters
@@ -76,8 +76,8 @@ public class HierarchicalClustering {
                 newClusterItems.add(clusters.get(i).items);
             }
         }
-        logger.info(newClusterItems.toString());
-        logger.info(String.format("Count: %d", newClusterItems.size()));
+        // logger.info(newClusterItems.toString());
+        // logger.info(String.format("Count: %d", newClusterItems.size()));
         
         // Assembling the new cluster set
         List<Cluster> newClusters = new ArrayList();
