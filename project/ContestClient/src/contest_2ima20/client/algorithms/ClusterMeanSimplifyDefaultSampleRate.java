@@ -25,7 +25,10 @@ import nl.tue.geometrycore.geometry.linear.PolyLine;
  */
 public class ClusterMeanSimplifyDefaultSampleRate extends TrajectorySummarizationAlgorithm {
     private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("cluster_mean_simplify_algo");
-    protected double sampleRate = 30;
+
+    protected double getSampleRate(){
+        return 30;
+    }
 
     private double[][] computeFrechetDistanceMatrix(List<? extends PolyLine> inputPolylines) {
         double[][] distances = new double[inputPolylines.size()][inputPolylines.size()];
@@ -168,9 +171,10 @@ public class ClusterMeanSimplifyDefaultSampleRate extends TrajectorySummarizatio
 
     private PolyLine computeMeanPoLyline(List<InputPolyLine> polyLineGroup) {
         // logger.info("computing clusters");
-        double sampleRate = 30; // We can change this
         double fraction = 0;
+        double sampleRate = this.getSampleRate();
         PolyLine averagePolyline = new PolyLine();
+        logger.info(String.format("Using sample rat: %f", sampleRate));
        
         for (int i = 0; i < sampleRate + 1; i++) {
             fraction = i/sampleRate;

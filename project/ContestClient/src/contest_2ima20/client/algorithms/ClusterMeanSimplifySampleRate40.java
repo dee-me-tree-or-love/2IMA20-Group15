@@ -10,5 +10,9 @@ package contest_2ima20.client.algorithms;
  * @author Group15
  */
 public class ClusterMeanSimplifySampleRate40 extends ClusterMeanSimplifyDefaultSampleRate {
-    protected double sampleRate = 40;
+
+    @Override
+    protected double getSampleRate(){
+        return 40;
+    }
 }
